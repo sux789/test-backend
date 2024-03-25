@@ -3,10 +3,10 @@
 ## 实战测试
 前端github [链接](https://github.com/sux789/test-frontend)  
 后端github [链接](https://github.com/sux789/test-backend)  
-部署地址 [链接](http://test.kono.top/)  
+**部署地址** [链接](http://test.kono.top/)  可以看运行效果，也可以看调试sql
 
 
-## 这次项目中后端代码,能提高一个层次展示
+## 能提高一个层次代码展示
 
 1. 内部层次结构
    代码[链接](https://github.com/sux789/test-backend/blob/main/app/controller/v1/Post.php)
@@ -42,17 +42,18 @@
 | 第三层 | PostModel          | PostModel                  |
 
 2. 代码内部管理
+    1. 
+        ```php
+        // 整个系统统一json格式 反之每个人去手动写，这个地方还有统一异常和错误码管理
+        function json_format($errno, $msg, $data)
+        {
+            return compact('errno', 'msg', 'data');
+        }
+        ```
+    1. 前端 api 管理 api.js文件中，如果多了可以分类分层次放置 https://github.com/sux789/test_frontend/blob/master/src/api.js
+    3. 另外 使用 http://test.kono.top/v1/misc/getAttrOptions 是统一管理一些下拉，比如男女，状态等等。
 
-```php
-// 整个系统统一json格式 反之每个人去手动写，这个地方还有统一异常和错误码管理
-function json_format($errno, $msg, $data)
-{
-    return compact('errno', 'msg', 'data');
-}
-```
-另外 使用 http://test.kono.top/v1/misc/getAttrOptions 是统一管理一些下拉，比如男女，状态等等。
-
-3. 后端代码之常量，小地方
+3. 后端代码之常量，看起来不起眼
    app/model/CategoryModel.php
 
 ```php
@@ -68,7 +69,7 @@ class CategoryModel extends Model
 }
 ```
 
-4. 事务
+4. 事务,几乎所有人都很粗暴，以前遇到过问题解决过，有几层意思里面
 
 ```php
  /**
@@ -100,23 +101,49 @@ class CategoryModel extends Model
 5. 在线调试 实战测试[部署在这个url](http://test.kono.top/),点击就可以调试出如下，开发维护效率
    ![](http://test.kono.top/static/images/debug.png)
 
-### 后端想法没有实现
+6. 后端想法没有实现
+   1. 只做已经分类，没有多级分类，
+       1. 方法1 父子分类操作，实时读取树，while->listLevel()// 读取父子目录，需要记录已经读取，容易写不好读
+       2. 方法2 通过字段记录路径，sql findInSet 或like比上面简单好一点，不利于索引优化
+       3. 方法3 child_id,level,parent_id，直观,可以集合操作，尤其适合对传播练大数据量优化，索引长度4字节!
+          下面这个图，前两个方法就是灾难了  
+          ![](http://test.kono.top/static/images/pid-uid.png)  
+          是逻辑放索引上的一个极小体现。
 
-1. 只做已经分类，没有多级分类，
-    1. 方法1 父子分类操作，实时读取树，while->listLevel()// 读取父子目录，需要记录已经读取，容易写不好读
-    2. 方法2 通过字段记录路径，sql findInSet 或like比上面简单好一点，不利于索引优化
-    3. 方法3 child_id,level,parent_id，直观,可以集合操作，尤其适合对传播练大数据量优化，索引长度4字节!
-       下面这个图，前两个方法就是灾难了  
-       ![](http://test.kono.top/static/images/pid-uid.png)  
-       是逻辑放索引上的一个极小体现。
+   4. 分页及其排序
+       2. 分页 offset ,limit 700000,20这样的不对，暂时没有分页，最好where id>700000 limit 20
+       3. 排序字段和where字段最好一直，只是经历过
+   5. 计划v2/下面放es 搜索 。api版本有
 
-4. 分页及其排序
-    2. 分页 offset ,limit 700000,20这样的不对，暂时没有分页，最好where id>700000 limit 20
-    3. 排序字段和where字段最好一直，只是经历过
-5. 计划v2/下面放es 搜索 。api版本有
+### 表结构
+1. mysql [表结构](https://github.com/sux789/test-backend/blob/main/schema.sql)
+2. es 没有完成 https://github.com/sux789/test-backend/blob/main/app/service/ElasticSearchService.php
+```php
+        $properties = array(
+            'id' => array('type' => 'integer',),
+            'user_id' => array('type' => 'integer',),
+            'medium_id' => array('type' => 'integer',),
+            'category_id' => array('type' => 'integer',),
+            'cover_image_src' => array('type' => 'text',),
+            'comments_count' => array('type' => 'integer',),
+            'likes_count' => array('type' => 'integer',),
+            'create_time' => array('type' => 'date',),
+            'update_time' => array('type' => 'date',),
+            'content' => array('type' => 'text',),
+            'comments' => array(
+                'type' => 'nested',
+                'properties' => array(
+                    'id' => array('type' => 'integer',),
+                    'user_id' => array('type' => 'integer',),
+                    'content' => array('type' => 'text',),
+                    'create_time' => array('type' => 'date',)
+                ,)
+            ,),
+        );
+        $mapping = ["properties" => $properties];
+```
+### 其他代码
 
-### 前端
-1. api 管理 api.js文件中，如果多了可以分类分层次放置
 2. [前端代码](https://github.com/sux789/test_frontend/blob/master/src/components/PostList.vue)
 ```vue
  <script>
@@ -205,4 +232,26 @@ class CategoryModel extends Model
   };
 </script>
 ```
-最后 [表结构](https://github.com/sux789/test-backend/blob/main/schema.sql)
+
+```php
+  // mysql 搜索
+  function search($keyword = '', $medium_id = 0, $category_id = 0, $time_period = '', $sort = '')
+    {
+        $list = $this->postModel
+            ->when($medium_id, function ($query) use ($medium_id) {
+                return $query->where('medium_id', $medium_id);
+            })->when($category_id, function ($query) use ($category_id) {
+                return $query->where('category_id', $category_id);
+            })->when($time_period, function ($query) use ($time_period) {
+                $time = date('Y-m-d H:i:s', time() - 60 * 60 * 24 * $time_period);
+                return $query->whereTime('create_time', '>', $time);
+            })->when($sort, function ($query) use ($sort) {
+                return $query->order($sort);
+            })->filter(function ($post) {
+                $post['pub_date'] = substr($post['create_time'], 0, 10);
+                return $post;
+            })->select();
+        return $list;
+    }
+```
+
