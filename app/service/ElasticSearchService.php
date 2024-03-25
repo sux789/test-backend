@@ -10,6 +10,10 @@ class ElasticSearchService extends \think\Service
 {
     const INDEX_NAME = 'posts';
 
+    function search()
+    {
+
+    }
     function sync()
     {
         $client = $this->getClient();
@@ -77,6 +81,5 @@ class ElasticSearchService extends \think\Service
         );
         $mapping = ["properties" => $properties];
         return $this->getClient()->createIndex(self::INDEX_NAME, $mapping);
-        //eturn $this->getClient()->indices()->create($mapping);
     }
 }

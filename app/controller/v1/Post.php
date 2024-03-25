@@ -18,7 +18,7 @@ class Post extends BaseController
     protected $likeService = null;
     protected $commentService = null;
 
-    public function __construct(PostService $postService, LikeService $likeService,CommentService $commentService)
+    public function __construct(PostService $postService, LikeService $likeService, CommentService $commentService)
     {
         $this->postService = $postService;
         $this->likeService = $likeService;
@@ -27,22 +27,22 @@ class Post extends BaseController
 
     public function posts($keyword = '', $medium_id = 0, $category_id = 0, $time_period = '', $sort = '')
     {
-
+        // step 1 search
         $list = $this->postService->search($keyword, $medium_id, $category_id, $time_period, $sort);
 
+        // step 2 有限数据里面找到帖子对人我的点赞
         $post_ids = $list->column('id');
         $likedMap = $this->likeService->getPostUserMap($post_ids, $this->auth_id);
 
+        // step 3 给字段设置点赞
         $list->filter(function ($post) use ($likedMap) {
             $post['liked'] = $likedMap[$post['id']] ?? false;
             return $post;
         });
 
-        if (!$list->isEmpty()) {
-            $list = ListEnricher::enrichOne($list, 'user_id');
-        }
+        // set4 补充用户信息到结果中，这是一个特殊角度，简单直观
+        $list = ListEnricher::enrichOne($list, 'user_id');
 
-        HeaderLog::log('posts', $list);
         return json_success($list);
     }
 
@@ -62,7 +62,7 @@ class Post extends BaseController
             json_error(self::ERRNO_COMMENT_LEN, '评论内容不能少于6个字符');
         }
 
-        $rs = $this->commentService->comment($this->auth_id, $post_id,$comment);
+        $rs = $this->commentService->comment($this->auth_id, $post_id, $comment);
     }
 
     /**
