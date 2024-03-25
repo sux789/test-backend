@@ -1,10 +1,10 @@
-## 实战测试 完成：4个下拉框搜索和评论点赞
+# 实战测试 完成：4个下拉框搜索和评论点赞
 
 前端github [链接](https://github.com/sux789/test-frontend)  
 后端github [链接](https://github.com/sux789/test-backend)  
 **部署地址** [链接](http://test.kono.top/)  可以看运行效果，也可以看调试sql如下运行图
 
-## 能提高一个层次代码展示
+# 能提高一个层次代码展示
 
 1. 内部层次结构
    代码[链接](https://github.com/sux789/test-backend/blob/main/app/controller/v1/Post.php)
@@ -115,7 +115,7 @@ class CategoryModel extends Model
         3. 排序字段和where字段最好一直，只是经历过
     5. 计划v2/下面放es 搜索 。mysql文本搜索不合适。
 
-### 表结构
+# 表结构
 
 1. mysql [表结构](https://github.com/sux789/test-backend/blob/main/schema.sql)
 2. es 没有完成 https://github.com/sux789/test-backend/blob/main/app/service/ElasticSearchService.php
@@ -145,7 +145,7 @@ class CategoryModel extends Model
         $mapping = ["properties" => $properties];
 ```
 
-### 其他代码
+# 其他代码
 
 2. [前端代码](https://github.com/sux789/test_frontend/blob/master/src/components/PostList.vue)
 
