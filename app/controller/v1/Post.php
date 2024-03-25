@@ -41,6 +41,8 @@ class Post extends BaseController
         });
 
         // set4 补充用户信息到结果中，这是一个特殊角度，简单直观
+        // 避免model复杂关系和复杂查询builder是小，大的是角度是逻辑放在索引上面
+        // 顺手写了这个ListEnricher类，大忌
         $list = ListEnricher::enrichOne($list, 'user_id');
 
         return json_success($list);
