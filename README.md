@@ -1,9 +1,9 @@
 
 
-## 实战测试
+## 实战测试 完成：4个下拉框搜索和评论点赞
 前端github [链接](https://github.com/sux789/test-frontend)  
 后端github [链接](https://github.com/sux789/test-backend)  
-**部署地址** [链接](http://test.kono.top/)  可以看运行效果，也可以看调试sql
+**部署地址** [链接](http://test.kono.top/)  可以看运行效果，也可以看调试sql如下运行图
 
 
 ## 能提高一个层次代码展示
