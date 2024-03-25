@@ -26,8 +26,8 @@ class Option extends BaseController
                 ['value' => 7, 'text' => 'Less than 7 days']
             ],
             'sort' => [
-                ['value' => 'publish_date desc', 'text' => 'newest'],
-                ['value' => 'likes desc', 'text' => 'likes']
+                ['value' => 'create_time desc', 'text' => 'newest'],
+                ['value' => 'likes desc', 'text' => 'likes desc']
             ],
         ];
         return json($data);

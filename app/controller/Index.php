@@ -19,6 +19,7 @@ class Index extends BaseController
 
     public function index()
     {
+        phpinfo();
         return \view('index');
     }
 

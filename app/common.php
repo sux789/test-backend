@@ -35,17 +35,20 @@ function json_format($errno, $msg, $data)
     return compact('errno', 'msg', 'data');
 }
 
-function json_error($errno)
+function json_error($errno = 1)
 {
 
     $msg = 'error_unknown';
     // 统一错误码管理，在这里
     $data = json_format($errno, $msg, []);
-    json($data, 400);
+    return json($data, 400);
 }
 
 function json_success($rs)
 {
     $data = json_format(0, 'ok', $rs);
-    json($data);
+    $data['getparams']=input('get.');
+    $data['postparams']=input('post.');
+    \app\common\HeaderLog::show();
+    return json($data);
 }

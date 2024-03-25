@@ -55,8 +55,8 @@ class ListEnricher
                     $item[$column_name] = $enriched[$index];
                 }
             }
-            return $list;
         }
+        return $list;
     }
 
 

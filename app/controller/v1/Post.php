@@ -5,27 +5,38 @@ namespace app\controller\v1;
 
 use app\BaseController;
 use app\common\HeaderLog;
+use app\service\LikeService;
 use think\Request;
-use app\model\PostModel;
+use app\service\CommentService;
+use app\service\PostService;
 use app\common\ListEnricher;
 
 class Post extends BaseController
 {
-    protected $postModel = null;
+    const ERRNO_COMMENT_LEN = 10001;
+    protected $postService = null;
+    protected $likeService = null;
+    protected $commentService = null;
 
-    public function __construct(PostModel $postModel)
+    public function __construct(PostService $postService, LikeService $likeService,CommentService $commentService)
     {
-        $this->postModel = $postModel;
+        $this->postService = $postService;
+        $this->likeService = $likeService;
+        $this->commentService = $commentService;
     }
 
     public function posts($keyword = '', $medium_id = 0, $category_id = 0, $time_period = '', $sort = '')
     {
-        $list = $this->postModel
-            ->when($medium_id, function ($query) use ($medium_id) {
-                return $query->where('medium_id', $medium_id);
-            })->when($category_id, function ($query) use ($category_id) {
-                return $query->where('category_id', $category_id);
-            })->select();
+
+        $list = $this->postService->search($keyword, $medium_id, $category_id, $time_period, $sort);
+
+        $post_ids = $list->column('id');
+        $likedMap = $this->likeService->getPostUserMap($post_ids, $this->auth_id);
+
+        $list->filter(function ($post) use ($likedMap) {
+            $post['liked'] = $likedMap[$post['id']] ?? false;
+            return $post;
+        });
 
         if (!$list->isEmpty()) {
             $list = ListEnricher::enrichOne($list, 'user_id');
@@ -37,7 +48,21 @@ class Post extends BaseController
 
     function like($post_id)
     {
+        $rs = $this->likeService->liked($this->auth_id, $post_id)
+            ? $this->likeService->unlike($this->auth_id, $post_id)
+            : $this->likeService->like($this->auth_id, $post_id);
 
+        return json_success($rs);
+    }
+
+    function comment($post_id, $comment)
+    {
+        $comment = input('post.comment', '', 'trim');
+        if (mb_strlen($comment) < 6) {  // 最佳 throw_if($bool, self::ERRNO_COMMENT_LEN)
+            json_error(self::ERRNO_COMMENT_LEN, '评论内容不能少于6个字符');
+        }
+
+        $rs = $this->commentService->comment($this->auth_id, $post_id,$comment);
     }
 
     /**
